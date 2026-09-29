@@ -1,3 +1,5 @@
+// BLOQUE 1
+
 'use strict';
 const params =  new URLSearchParams(window.location.search); // Obtenmos el URL del navegador
 const user = params.get('user')  ?? 'anonimo'; // Obtenemos el usuario de la URL y si no tiene se le asigna 'anonimo' por defecto
@@ -30,3 +32,41 @@ let saldo = null;
 apodo = apodo || "Cliente VIP";
 membresia = membresia ?? "Basica";
 saldo = saldo ?? 2;
+
+// BLOQUE 2 - CATALOGO Y OPERACIONES FINANCIERAS
+
+let precio_chaqueta = "59.90€";
+let precio_camiseta = "19.99€";
+let precio_float_chaqueta = parseFloat(precio_chaqueta);
+let precio_float_camiseta = parseFloat(precio_camiseta);
+let subtotal = precio_float_camiseta + precio_float_chaqueta;
+const iva = 0.21;
+let base_imponible = 0;
+let iva_total = 0;
+let total_pago = 0;
+let cupon = "90€";
+
+cupon = parseFloat(cupon);
+if (!isNaN(subtotal)) { // Verificamos si subtotal es un numero
+    base_imponible = subtotal - cupon; // La base imponible de una factura es el importe neto de la venta o servicio antes de aplicar impuestos como el IVA o retenciones como el IRPF
+    iva_total = base_imponible * iva;
+    total_pago = base_imponible + iva_total;
+    console.log(total_pago);
+} else {
+    console.log("No es un numero");
+}
+
+let numero_pedido = 0;
+numero_pedido ++;
+
+// Formateamos de manera regional con la funcion Intl.NumberFormat, esto formatea de manera automatica a la moneda del pais
+// en este caso España 'es-ES'. Ej: '123456.789' => '123.456,79 €'
+const formatter_EUR = new Intl.NumberFormat("es-ES", {
+    style: "currency",
+    currency: "EUR"
+});
+const subtotal_formateado = formatter_EUR.format(subtotal);
+const cupon_formateado = formatter_EUR.format(cupon);
+const iva_total_formateado = formatter_EUR.format(iva_total);
+const total_pago_formateado = formatter_EUR.format(total_pago);
+
