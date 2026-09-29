@@ -8,6 +8,8 @@ const lang = navigator.language; // Aqui definimos una constante para que almace
 const id = crypto.randomUUID(); // Creamos un ID unico y seguro con la api de crypto
 const email = " enmanuellemos.f@gmail.com ";
 const id_cliente = "42";
+const btn_oferta = document.querySelector('.oferta_relampago');
+const span_contador = document.querySelector('.contador_oferta');
 
 // Constante para definir el formato de como queremos la fecha
 const date = new Date().toLocaleDateString("es-ES",{
@@ -70,3 +72,23 @@ const cupon_formateado = formatter_EUR.format(cupon);
 const iva_total_formateado = formatter_EUR.format(iva_total);
 const total_pago_formateado = formatter_EUR.format(total_pago);
 
+// BLOQUE 3: OFERTA RELAMPAGO Y TEMPORIZADOR
+
+let contador = 15;
+let intervalo = null; // aqui guardaremos el setInterval
+let oferta_activa = false
+btn_oferta.addEventListener('click', () => {
+    if (oferta_activa) return; // prevenir multiples clics
+    oferta_activa = true;
+    
+    intervalo = setInterval(() => {
+        contador--;
+        span_contador.textContent = `Contador: ${contador}`;
+        
+        if (contador === 0) {
+            clearInterval(intervalo);
+            oferta_activa = false; // reset para futuras promociones
+            span_contador.textContent = 'La oferta relampago ha expirado'; // notificar que expiro
+        }
+    }, 1000);
+});
