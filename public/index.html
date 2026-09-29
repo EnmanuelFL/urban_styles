@@ -1,12 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Urban Styles</title>
+    <script src="https://www.googletagmanager.com/gtag/js" async></script>
+    <script src="src/app.js" defer></script>
 </head>
 <body>
+    <header class="sesion">
+        <div class="user-name"></div> <!-- aqui ira el nombre -->
+        <div class="user-id"></div> <!-- aqui ira el ID formateado -->
+        <div class="role"></div> <!-- aqui ira el role -->
+        <div class="fecha_actual"></div> <!-- aqui ira la fecha actualizada -->
+        <div class="idioma_navegador"></div> <!-- aqui se mostrara el idioma en el que el navegador-->
+
+    </header>
+
+    <main class="catalogo_carrito">
+        <section class="catalogo">
+            <div class="productos"> <!-- Aqui iran los productos -->
+                <!-- Se hara una card para cuando se vea el catalogo aparezcan varias opciones: añadir al carrito, etc... -->>
+            </div> 
+        </section>
+        <section class="carrito"> <!-- Aqui se añadoran los productos al tocar la opcion de "añadir al carrito" en el apartado de catalogo -->
+            <div class="cesta">
+                <div class="descuentos">Descuento</div>
+                <div class="iva">IVA</div>
+                <div class="subtotal">Subtotal</div>
+                <div class="total">Total</div>
+            </div>
+        </section>
+    </main>
+
+    <section class="ofertas">
+        <div class="banner_promocional">
+            <img class="img_banner_promocional" src="" alt=""> <!-- Aqui ira el banner promocional -->
+            <button class="oferta_relampago" >Activar oferta relampago</button>
+            <span class="contador_oferta"></span>
+        </div>
+        
+    </section>
+
+    <section class="reseñas">
+        <div class="crear_reseña">
+            <textarea class="text_reseña">Indicanos tu opinion</textarea>
+            <button>Añadir reseña</button>
+            <!-- En el archivo js a la hora de crear la reseña aparece un boton de publicar -->
+        </div>
+        <div class="historia_reseñas">
+
+        </div>
+    </section>
     
-    <script src="src\app.js"></script>
+    <footer class="footer"></footer>
+    
 </body>
 </html>
