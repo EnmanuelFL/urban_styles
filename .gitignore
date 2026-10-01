@@ -1,0 +1,36 @@
+# ── Dependencies ──────────────────────────
+node_modules/
+
+# ── Tailwind compiled output ───────────────
+# Keep input.css but exclude the compiled output (it can always be rebuilt)
+# assets/css/styles.css   ← Uncomment this line if you prefer not to commit compiled CSS
+
+# ── Environment & secrets ─────────────────
+.env
+.env.*
+!.env.example
+
+# ── OS / editor junk ──────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# ── IDE / tooling ─────────────────────────
+.vscode/
+.idea/
+*.iml
+.editorconfig
+
+# ── Logs ──────────────────────────────────
+*.log
+npm-debug.log*
+
+# ── Build artifacts ───────────────────────
+dist/
+build/
+
+# ── Project-specific private docs ─────────
+design_changelog.txt
