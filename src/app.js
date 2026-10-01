@@ -128,33 +128,32 @@ btn_subir_resenia.addEventListener('click', () => {
     historial_resenias.innerHTML = '';
     
     resenias.forEach(resena => {
-        // Adaptación al DOM con clases Tailwind para coincidir con el diseño
         const div_historia_resenias = document.createElement('article');
-        div_historia_resenias.className = 'rounded-2xl border border-[#dedbd4] bg-white p-5 shadow-sm';
+        div_historia_resenias.className = 'rounded-2xl border border-[#dedbd4] bg-white p-6 shadow-sm';
         
         const header_flex = document.createElement('div');
         header_flex.className = 'flex items-start justify-between gap-4';
         
         const user_info_flex = document.createElement('div');
-        user_info_flex.className = 'flex items-center gap-3';
+        user_info_flex.className = 'flex items-center gap-4';
         
         const avatar = document.createElement('div');
-        avatar.className = 'flex size-9 items-center justify-center rounded-full bg-[#e7d2c0] text-[10px] font-bold text-[#8a5938] flex-shrink-0 uppercase';
+        avatar.className = 'flex size-11 items-center justify-center rounded-full bg-[#e6d8cf] text-[11px] font-bold text-[#8a5938] uppercase flex-shrink-0';
         avatar.textContent = resena.usuario.substring(0, 2);
         
         const text_container = document.createElement('div');
         
         const titulo = document.createElement('h3');
-        titulo.className = 'text-[13px] font-semibold text-[#252321]';
+        titulo.className = 'text-[14px] font-bold text-[#252321]';
         titulo.textContent = resena.usuario;
         
         const hora = document.createElement('p');
-        hora.className = 'mt-0.5 flex items-center gap-1 text-[11px] text-[#99948b]';
+        hora.className = 'mt-1 flex items-center gap-1.5 text-[11px] text-[#99948b]';
         hora.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${resena.hora}`;
         
         const stars = document.createElement('div');
-        stars.className = 'flex gap-0.5 text-[#a86b42]';
-        stars.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'.repeat(5);
+        stars.className = 'flex gap-1 text-[#a86b42]';
+        stars.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'.repeat(5);
         
         text_container.appendChild(titulo);
         text_container.appendChild(hora);
@@ -164,7 +163,7 @@ btn_subir_resenia.addEventListener('click', () => {
         header_flex.appendChild(stars);
         
         const comentario = document.createElement('p');
-        comentario.className = 'mt-4 text-[13px] leading-relaxed text-[#666159]';
+        comentario.className = 'mt-5 text-[14px] leading-relaxed text-[#666159]';
         comentario.textContent = resena.comentario;
         
         div_historia_resenias.appendChild(header_flex);
