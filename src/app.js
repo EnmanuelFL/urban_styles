@@ -83,7 +83,7 @@ const total_pago_formateado = formatter_EUR.format(total_pago);
 
 let contador = 15;
 let intervalo = null; // aqui guardaremos el setInterval
-let oferta_activa = false;
+let oferta_activa = false; // indica si la cuenta atras esta corriendo
 
 // Estado del carrito: unidades de cada producto y si el cupon esta aplicado
 let carrito_chaqueta = 0;    // unidades de chaqueta en el carrito
@@ -93,16 +93,29 @@ let carrito_real_madrid = 0; // unidades de camiseta real madrid en el carrito
 let cupon_activo = false;    // indica si el cupon de oferta relampago esta aplicado
 
 btn_oferta.addEventListener('click', () => {
-    if (oferta_activa) return; // prevenir multiples clics mientras esta corriendo
-    oferta_activa = true;
-    cupon_activo = true; // el cupon se activa inmediatamente al pulsar el boton
-    contador = 15; // resetear el contador para cada nueva activacion
-    btn_oferta.textContent = 'Oferta activa...';
-    btn_oferta.disabled = true;
-    btn_oferta.classList.add('opacity-50', 'cursor-not-allowed');
+    // FASE 2: Si el contador ya esta corriendo y el usuario pulsa para reclamar/activar la oferta
+    if (oferta_activa && !cupon_activo) {
+        cupon_activo = true; // El descuento SOLO se aplica cuando el usuario hace clic en activar oferta
+        actualizarCarrito(); // Aplica el descuento al carrito inmediatamente
+        btn_oferta.textContent = 'Oferta activada';
+        btn_oferta.disabled = true;
+        btn_oferta.className = 'oferta_relampago px-8 py-3 bg-emerald-600 border border-emerald-600 text-white text-sm font-medium tracking-wide transition-all cursor-default';
+        return;
+    }
 
-    // Actualizar el carrito: si ya hay productos aplica el descuento; si no hay productos, no se mostrara hasta anadirlos
-    actualizarCarrito();
+    // Si ya esta corriendo y ya fue activada, evitar clics duplicados
+    if (oferta_activa) return;
+
+    // FASE 1: Activar el contador (marcha atras de 15 segundos)
+    oferta_activa = true;
+    cupon_activo = false; // AUN NO se aplica el descuento
+    contador = 15;
+    span_contador.textContent = contador;
+
+    // El boton cambia a "Activar oferta" y permanece clickable durante los 15s
+    btn_oferta.textContent = 'Activar oferta';
+    btn_oferta.disabled = false;
+    btn_oferta.className = 'oferta_relampago px-8 py-3 bg-white text-gray-900 border border-white text-sm font-bold tracking-wide hover:bg-gray-100 transition-all cursor-pointer shadow-lg';
 
     intervalo = setInterval(() => {
         contador--;
@@ -111,16 +124,26 @@ btn_oferta.addEventListener('click', () => {
         if (contador === 0) {
             clearInterval(intervalo);
             intervalo = null;
-
-            // reset para futuras promociones: el boton vuelve a estar disponible
             oferta_activa = false;
-            cupon_activo = false; // el descuento se desactiva al expirar la oferta
-            actualizarCarrito(); // recalcular sin cupon
 
-            span_contador.textContent = '—';
-            btn_oferta.textContent = 'Activar oferta relámpago';
-            btn_oferta.disabled = false;
-            btn_oferta.classList.remove('opacity-50', 'cursor-not-allowed');
+            // Si antes de los 15s NO se le dio al boton de activar oferta, NO se aplica el descuento
+            if (!cupon_activo) {
+                btn_oferta.textContent = 'Oferta expirada (No activada)';
+                btn_oferta.disabled = true;
+                btn_oferta.className = 'oferta_relampago px-8 py-3 border border-gray-700 text-gray-500 text-sm font-medium tracking-wide transition-all cursor-not-allowed';
+            } else {
+                btn_oferta.textContent = 'Oferta finalizada';
+                btn_oferta.disabled = true;
+                btn_oferta.className = 'oferta_relampago px-8 py-3 border border-emerald-700 text-emerald-400 text-sm font-medium tracking-wide transition-all cursor-not-allowed';
+            }
+
+            // Restaurar para futuras activaciones tras un breve lapso
+            setTimeout(() => {
+                span_contador.textContent = '—';
+                btn_oferta.textContent = 'Iniciar oferta relámpago';
+                btn_oferta.disabled = false;
+                btn_oferta.className = 'oferta_relampago px-8 py-3 border border-white text-white text-sm font-medium tracking-wide hover:bg-white hover:text-gray-900 transition-all cursor-pointer';
+            }, 2500);
         }
     }, 1000);
 });

@@ -67,7 +67,14 @@ Todos los valores se formatean con `Intl.NumberFormat` en la locale `es-ES` con 
 
 ### Oferta relampago
 
-Al pulsar el boton de activar, se inicia un `setInterval` de 15 segundos. Durante ese tiempo, el cupon queda activado. Si el carrito esta vacio, no se muestra descuento hasta anadir productos. Al tener productos, el descuento se calcula de forma dinamica y porcentual sobre el subtotal segun los estandares de comercio electronico, evitando importes negativos:
+### Oferta relampago
+
+Al pulsar el boton "Iniciar oferta relampago", se inicia una marcha atras de 15 segundos mediante `setInterval`. Durante ese intervalo, el boton cambia a "Activar oferta" y permanece clickable:
+
+- Si el usuario hace clic en "Activar oferta" antes de que los 15 segundos expiren, el cupon se activa y se aplica inmediatamente al carrito.
+- Si transcurren los 15 segundos sin que el usuario pulse el boton, el tiempo se agota y la oferta no se aplica.
+
+Cuando el cupon es activado, el descuento se calcula de forma dinamica y porcentual sobre el subtotal segun los estandares de comercio electronico, evitando importes negativos:
 
 - Subtotal mayor o igual a 500 euros: 15% de descuento (el cliente paga el 85% del importe)
 - Subtotal entre 300 y 499.99 euros: 12% de descuento
@@ -75,7 +82,7 @@ Al pulsar el boton de activar, se inicia un `setInterval` de 15 segundos. Durant
 - Subtotal entre 50 y 149.99 euros: 8% de descuento
 - Subtotal menor a 50 euros: 5% de descuento
 
-Al terminar los 15 segundos, el cupon se desactiva automaticamente, el carrito se recalcula sin descuento y el boton queda disponible para futuras promociones.
+Al finalizar la cuenta atras, el estado se restablece tras un breve lapso para permitir futuras activaciones.
 
 ### Resenas
 
