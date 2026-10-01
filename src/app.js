@@ -10,6 +10,9 @@ const email = " enmanuellemos.f@gmail.com ";
 const id_cliente = "42";
 const btn_oferta = document.querySelector('.oferta_relampago');
 const span_contador = document.querySelector('.contador_oferta');
+const historial_resenias = document.querySelector('.historial_resenias');
+const text_resenias = document.querySelector('.text_resenias');
+const btn_subir_resenia = document.querySelector('.anyadir_resenia');
 
 // Constante para definir el formato de como queremos la fecha
 const date = new Date().toLocaleDateString("es-ES",{
@@ -19,7 +22,7 @@ const date = new Date().toLocaleDateString("es-ES",{
     year: "numeric"
 });
 
-const state_conexion = navigator.onLine ? 'Conectado' : 'Desconectado'; // Constante para devolver el estado de conexion del navegador
+const estado_conexion = navigator.onLine ? 'Conectado' : 'Desconectado'; // Constante para devolver el estado de conexion del navegador
 const email_limpio = email.trim().toLowerCase(); // Limpiamos los espacios del email y lo pasamos a minusculas
 let id_cliente_formateado = id_cliente.padStart(6, "0"); // Y formateamos el id para que tenga 6 digitos con ceros ala izquierda
 const partes_email = email_limpio.split("@"); // Seleccionamos el usario antes del @, ej: enma.garcia@gmail.com => seria: enma.garcia
@@ -91,4 +94,48 @@ btn_oferta.addEventListener('click', () => {
             span_contador.textContent = 'La oferta relampago ha expirado'; // notificar que expiro
         }
     }, 1000);
+});
+
+// BLOQUE 4: CREACION Y PUBLICACION DE RESEÑAS
+
+btn_subir_resenia.addEventListener('click', () => {
+    const textarea_valor = text_resenias.value;
+    const resena = {
+        id: new Date().getTime(),
+        usuario: user, 
+        hora: new Date().toLocaleTimeString('es-ES'),
+        comentario: textarea_valor
+    };
+    let resenias = [];
+    try {
+        resenias = JSON.parse(localStorage.getItem('resenias')) ?? []; //  Recuperar reseñas existentes (puede que no haya ninguna todavía)
+        resenias.push(resena); //  Añadir la nueva reseña
+        localStorage.setItem('resenias', JSON.stringify(resenias)); //  Guardar array actualizado
+    } catch (error) {
+        // Verificar si es error de espacio lleno
+        if (error.name === "QuotaExceededError" ||  
+            error.code === 22 || 
+            error.name === "NS_ERROR_DOM_QUOTA_REACHED" || 
+            error.code === 1014) {
+        console.error("Error: Espacio de almacenamiento lleno.");
+        } else {
+        console.error("Error al acceder a localStorage:", error.message); // Capturar otros errores (ej. modo privado, políticas de seguridad)
+        }
+        return false;
+    }
+    resenias.forEach(resena => {
+        const div_hsitoria_resenias = document.createElement('div');
+        const titulo = document.createElement('p');
+        titulo.textContent = `Publicado por: ${resena.usuario}`;
+        const hora = document.createElement('p');
+        hora.textContent = `Fecha de publicacion: ${resena.hora}`;
+        const comentario = document.createElement('p');
+        comentario.textContent = `Descripcion: ${resena.comentario}`;
+        
+        div_hsitoria_resenias.appendChild(titulo);
+        div_hsitoria_resenias.appendChild(hora);
+        div_hsitoria_resenias.appendChild(comentario);
+        historial_resenias.appendChild(div_hsitoria_resenias);
+    });
+    text_resenias.value = '';
 });
