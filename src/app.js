@@ -116,13 +116,152 @@ btn_oferta.addEventListener('click', () => {
 
 // BLOQUE 4: CREACION Y PUBLICACION DE RESEÑAS
 
+// Formatea un timestamp (ms) al estilo: "0:53 a.m - 2/10/26"
+function formatearFechaHora(timestamp) {
+    const d = new Date(timestamp);
+    let horas = d.getHours();
+    const minutos = d.getMinutes().toString().padStart(2, '0');
+    const periodo = horas < 12 ? 'a.m' : 'p.m';
+    horas = horas % 12 || 12; // Convertir a formato 12h, sin padStart para que quede como "0:53"
+    const dia = d.getDate();
+    const mes = d.getMonth() + 1;
+    const anio = d.getFullYear().toString().slice(2); // Solo los últimos 2 dígitos del año: "26"
+    return `${horas}:${minutos} ${periodo} - ${dia}/${mes}/${anio}`;
+}
+
+// Crea y devuelve el elemento DOM de una reseña individual (con botones editar/eliminar)
+function crearTarjetaResena(resena, indice_en_array) {
+    const tarjeta = document.createElement('div');
+    tarjeta.className = 'border-l-2 border-gray-900 pl-5 py-1 group';
+    tarjeta.dataset.id = resena.id; // Guardamos el id para identificar la reseña
+
+    // Cabecera: autor + fecha
+    const cabecera = document.createElement('div');
+    cabecera.className = 'flex items-start justify-between gap-4';
+
+    const info = document.createElement('div');
+
+    const titulo = document.createElement('p');
+    titulo.className = 'font-semibold text-gray-900 text-sm';
+    titulo.textContent = resena.usuario; // textContent para prevenir XSS
+
+    const hora = document.createElement('p');
+    hora.className = 'text-xs text-gray-400 mt-0.5 mb-3';
+    hora.textContent = formatearFechaHora(resena.id); // textContent para prevenir XSS
+
+    info.appendChild(titulo);
+    info.appendChild(hora);
+
+    // Botones: Editar y Eliminar (visibles solo en hover gracias a group)
+    const acciones = document.createElement('div');
+    acciones.className = 'flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0';
+
+    const btn_editar = document.createElement('button');
+    btn_editar.className = 'text-xs text-gray-400 hover:text-gray-900 transition-colors underline underline-offset-2';
+    btn_editar.textContent = 'Editar';
+
+    const btn_eliminar = document.createElement('button');
+    btn_eliminar.className = 'text-xs text-gray-400 hover:text-red-600 transition-colors underline underline-offset-2';
+    btn_eliminar.textContent = 'Eliminar';
+
+    // ACCION: Eliminar reseña
+    btn_eliminar.addEventListener('click', () => {
+        let resenias = [];
+        try {
+            resenias = JSON.parse(localStorage.getItem('resenias')) ?? [];
+            // Filtrar por id para eliminar la reseña correcta
+            resenias = resenias.filter(r => r.id !== resena.id);
+            localStorage.setItem('resenias', JSON.stringify(resenias));
+        } catch (error) {
+            console.error("Error al eliminar reseña:", error.message);
+            return;
+        }
+        tarjeta.remove(); // Quitar del DOM directamente, sin re-renderizar todo
+    });
+
+    // ACCION: Editar reseña (convierte el comentario en textarea editable in-place)
+    btn_editar.addEventListener('click', () => {
+        const ya_editando = tarjeta.querySelector('.edit-textarea');
+        if (ya_editando) return; // Evitar abrir varios editores en la misma tarjeta
+
+        const texto_actual = comentario.textContent;
+        const editor = document.createElement('textarea');
+        editor.className = 'edit-textarea w-full p-2 text-sm border border-gray-300 focus:outline-none focus:border-gray-900 resize-none mt-1';
+        editor.rows = 3;
+        editor.value = texto_actual; // value para textarea (no textContent)
+
+        const btn_guardar = document.createElement('button');
+        btn_guardar.className = 'mt-2 px-4 py-1.5 bg-gray-900 text-white text-xs font-medium tracking-wide hover:bg-gray-700 transition-colors';
+        btn_guardar.textContent = 'Guardar';
+
+        const btn_cancelar = document.createElement('button');
+        btn_cancelar.className = 'mt-2 ml-2 px-4 py-1.5 text-xs text-gray-500 underline underline-offset-2 hover:text-gray-900 transition-colors';
+        btn_cancelar.textContent = 'Cancelar';
+
+        // Ocultar comentario original y mostrar editor
+        comentario.classList.add('hidden');
+        tarjeta.appendChild(editor);
+        tarjeta.appendChild(btn_guardar);
+        tarjeta.appendChild(btn_cancelar);
+        editor.focus();
+
+        // Cancelar edición: restaurar estado original
+        btn_cancelar.addEventListener('click', () => {
+            comentario.classList.remove('hidden');
+            editor.remove();
+            btn_guardar.remove();
+            btn_cancelar.remove();
+        });
+
+        // Guardar cambios en localStorage y actualizar el DOM
+        btn_guardar.addEventListener('click', () => {
+            const nuevo_texto = editor.value.trim();
+            if (!nuevo_texto) return;
+
+            let resenias = [];
+            try {
+                resenias = JSON.parse(localStorage.getItem('resenias')) ?? [];
+                const idx = resenias.findIndex(r => r.id === resena.id);
+                if (idx !== -1) {
+                    resenias[idx].comentario = nuevo_texto; // Actualizar solo el comentario
+                    localStorage.setItem('resenias', JSON.stringify(resenias));
+                }
+            } catch (error) {
+                console.error("Error al guardar edición:", error.message);
+                return;
+            }
+
+            comentario.textContent = nuevo_texto; // textContent para prevenir XSS
+            comentario.classList.remove('hidden');
+            editor.remove();
+            btn_guardar.remove();
+            btn_cancelar.remove();
+        });
+    });
+
+    acciones.appendChild(btn_editar);
+    acciones.appendChild(btn_eliminar);
+    cabecera.appendChild(info);
+    cabecera.appendChild(acciones);
+
+    // Comentario
+    const comentario = document.createElement('p');
+    comentario.className = 'text-gray-600 text-sm leading-relaxed';
+    comentario.textContent = resena.comentario; // textContent para prevenir XSS
+
+    tarjeta.appendChild(cabecera);
+    tarjeta.appendChild(comentario);
+
+    return tarjeta;
+}
+
 btn_subir_resenia.addEventListener('click', () => {
     const textarea_valor = text_resenias.value;
     if (!textarea_valor.trim()) return; // No publicar reseñas vacías
 
     const resena = {
         id: new Date().getTime(),
-        usuario: user, 
+        usuario: user,
         hora: new Date().toLocaleTimeString('es-ES'),
         comentario: textarea_valor
     };
@@ -133,9 +272,9 @@ btn_subir_resenia.addEventListener('click', () => {
         localStorage.setItem('resenias', JSON.stringify(resenias)); //  Guardar array actualizado
     } catch (error) {
         // Verificar si es error de espacio lleno
-        if (error.name === "QuotaExceededError" ||  
-            error.code === 22 || 
-            error.name === "NS_ERROR_DOM_QUOTA_REACHED" || 
+        if (error.name === "QuotaExceededError" ||
+            error.code === 22 ||
+            error.name === "NS_ERROR_DOM_QUOTA_REACHED" ||
             error.code === 1014) {
             console.error("Error: Espacio de almacenamiento lleno.");
         } else {
@@ -144,30 +283,9 @@ btn_subir_resenia.addEventListener('click', () => {
         return false;
     }
 
-    // Limpiar y re-renderizar el historial completo en orden más reciente primero
-    historial_resenias.innerHTML = '';
-    const resenias_orden_nuevo = [...resenias].reverse(); // Más reciente primero, sin mutar el array original
-    resenias_orden_nuevo.forEach(resena => {
-        const div_hsitoria_resenias = document.createElement('div');
-        div_hsitoria_resenias.className = 'border-l-2 border-gray-900 pl-5 py-1';
-
-        const titulo = document.createElement('p');
-        titulo.className = 'font-semibold text-gray-900 text-sm';
-        titulo.textContent = `${resena.usuario}`; // textContent para prevenir XSS
-
-        const hora = document.createElement('p');
-        hora.className = 'text-xs text-gray-400 mt-0.5 mb-3';
-        hora.textContent = `${resena.hora}`; // textContent para prevenir XSS
-
-        const comentario = document.createElement('p');
-        comentario.className = 'text-gray-600 text-sm leading-relaxed';
-        comentario.textContent = resena.comentario; // textContent para prevenir XSS
-
-        div_hsitoria_resenias.appendChild(titulo);
-        div_hsitoria_resenias.appendChild(hora);
-        div_hsitoria_resenias.appendChild(comentario);
-        historial_resenias.appendChild(div_hsitoria_resenias);
-    });
+    // Insertar la nueva reseña al principio del historial (más reciente primero), sin limpiar todo
+    const tarjeta = crearTarjetaResena(resena, resenias.length - 1);
+    historial_resenias.insertBefore(tarjeta, historial_resenias.firstChild);
 
     text_resenias.value = '';
 });
@@ -188,12 +306,12 @@ function renderizarProductos() {
     // Los valores dinámicos de precio se inyectan via textContent desde actualizarCarrito
     productosDiv.innerHTML = `
         <div class="product-card border border-gray-100 hover:-translate-y-0.5 hover:shadow-sm transition-all duration-200">
-            <div class="bg-gray-50 h-48 flex items-center justify-center">
-                <span class="text-5xl">🧥</span>
+            <div class="h-56 overflow-hidden bg-gray-50">
+                <img src="../assets/images/chaqueta negra.jfif" alt="Chaqueta negra" class="w-full h-full object-cover">
             </div>
             <div class="p-5">
                 <p class="text-xs uppercase tracking-widest text-gray-400 mb-1">Outerwear</p>
-                <h3 class="text-base font-semibold text-gray-900">Chaqueta Denim</h3>
+                <h3 class="text-base font-semibold text-gray-900">Chaqueta Negra</h3>
                 <p class="product-precio-chaqueta text-2xl font-bold mt-2 mb-4"></p>
                 <button
                     class="btn-add-chaqueta w-full py-2 text-xs font-medium tracking-widest uppercase border border-gray-900 hover:bg-gray-900 hover:text-white transition-colors">
@@ -202,12 +320,12 @@ function renderizarProductos() {
             </div>
         </div>
         <div class="product-card border border-gray-100 hover:-translate-y-0.5 hover:shadow-sm transition-all duration-200">
-            <div class="bg-gray-50 h-48 flex items-center justify-center">
-                <span class="text-5xl">👕</span>
+            <div class="h-56 overflow-hidden bg-gray-50">
+                <img src="../assets/images/camiseta_miles_morales.jfif" alt="Camiseta Miles Morales" class="w-full h-full object-cover">
             </div>
             <div class="p-5">
                 <p class="text-xs uppercase tracking-widest text-gray-400 mb-1">Tops</p>
-                <h3 class="text-base font-semibold text-gray-900">Camiseta Urban</h3>
+                <h3 class="text-base font-semibold text-gray-900">Camiseta Miles Morales</h3>
                 <p class="product-precio-camiseta text-2xl font-bold mt-2 mb-4"></p>
                 <button
                     class="btn-add-camiseta w-full py-2 text-xs font-medium tracking-widest uppercase border border-gray-900 hover:bg-gray-900 hover:text-white transition-colors">
@@ -301,26 +419,9 @@ function cargarResenasExistentes() {
 
     // Mostrar en orden más reciente primero (reverse) sin mutar el array guardado
     const resenias_orden_nuevo = [...resenias].reverse();
-    resenias_orden_nuevo.forEach(resena => {
-        const div_hsitoria_resenias = document.createElement('div');
-        div_hsitoria_resenias.className = 'border-l-2 border-gray-900 pl-5 py-1';
-
-        const titulo = document.createElement('p');
-        titulo.className = 'font-semibold text-gray-900 text-sm';
-        titulo.textContent = resena.usuario; // textContent para prevenir XSS
-
-        const hora = document.createElement('p');
-        hora.className = 'text-xs text-gray-400 mt-0.5 mb-3';
-        hora.textContent = resena.hora; // textContent para prevenir XSS
-
-        const comentario = document.createElement('p');
-        comentario.className = 'text-gray-600 text-sm leading-relaxed';
-        comentario.textContent = resena.comentario; // textContent para prevenir XSS
-
-        div_hsitoria_resenias.appendChild(titulo);
-        div_hsitoria_resenias.appendChild(hora);
-        div_hsitoria_resenias.appendChild(comentario);
-        historial_resenias.appendChild(div_hsitoria_resenias);
+    resenias_orden_nuevo.forEach((resena, i) => {
+        const tarjeta = crearTarjetaResena(resena, i);
+        historial_resenias.appendChild(tarjeta);
     });
 }
 
