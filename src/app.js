@@ -123,19 +123,72 @@ btn_subir_resenia.addEventListener('click', () => {
         }
         return false;
     }
+    
+    // Limpiar el contenedor antes de renderizar para evitar duplicados
+    historial_resenias.innerHTML = '';
+    
     resenias.forEach(resena => {
-        const div_historia_resenias = document.createElement('div');
-        const titulo = document.createElement('p');
-        titulo.textContent = `Publicado por: ${resena.usuario}`;
-        const hora = document.createElement('p');
-        hora.textContent = `Fecha de publicacion: ${resena.hora}`;
-        const comentario = document.createElement('p');
-        comentario.textContent = `Descripcion: ${resena.comentario}`;
+        // Adaptación al DOM con clases Tailwind para coincidir con el diseño
+        const div_historia_resenias = document.createElement('article');
+        div_historia_resenias.className = 'rounded-2xl border border-[#dedbd4] bg-white p-5 shadow-sm';
         
-        div_historia_resenias.appendChild(titulo);
-        div_historia_resenias.appendChild(hora);
+        const header_flex = document.createElement('div');
+        header_flex.className = 'flex items-start justify-between gap-4';
+        
+        const user_info_flex = document.createElement('div');
+        user_info_flex.className = 'flex items-center gap-3';
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'flex size-9 items-center justify-center rounded-full bg-[#e7d2c0] text-[10px] font-bold text-[#8a5938] flex-shrink-0 uppercase';
+        avatar.textContent = resena.usuario.substring(0, 2);
+        
+        const text_container = document.createElement('div');
+        
+        const titulo = document.createElement('h3');
+        titulo.className = 'text-[13px] font-semibold text-[#252321]';
+        titulo.textContent = resena.usuario;
+        
+        const hora = document.createElement('p');
+        hora.className = 'mt-0.5 flex items-center gap-1 text-[11px] text-[#99948b]';
+        hora.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${resena.hora}`;
+        
+        const stars = document.createElement('div');
+        stars.className = 'flex gap-0.5 text-[#a86b42]';
+        stars.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'.repeat(5);
+        
+        text_container.appendChild(titulo);
+        text_container.appendChild(hora);
+        user_info_flex.appendChild(avatar);
+        user_info_flex.appendChild(text_container);
+        header_flex.appendChild(user_info_flex);
+        header_flex.appendChild(stars);
+        
+        const comentario = document.createElement('p');
+        comentario.className = 'mt-4 text-[13px] leading-relaxed text-[#666159]';
+        comentario.textContent = resena.comentario;
+        
+        div_historia_resenias.appendChild(header_flex);
         div_historia_resenias.appendChild(comentario);
+        
         historial_resenias.appendChild(div_historia_resenias);
     });
     text_resenias.value = '';
+});
+
+// BLOQUE 5: INICIALIZACIÓN DEL DOM (Conexión de datos)
+document.addEventListener('DOMContentLoaded', () => {
+    // Info de sesión
+    document.querySelector('.user-name').textContent = user === 'anonimo' ? apodo : user;
+    document.querySelector('.user-id').textContent = `ID ${id_cliente_formateado} · Customer`;
+    document.querySelector('.fecha_actual').textContent = date;
+    document.querySelector('.idioma_navegador').innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        ${lang}
+    `;
+
+    // Totales del carrito
+    document.querySelector('.subtotal').textContent = subtotal_formateado;
+    document.querySelector('.descuentos').textContent = `- ${cupon_formateado}`;
+    document.querySelector('.iva').textContent = iva_total_formateado;
+    document.querySelector('.total').textContent = total_pago_formateado;
 });
