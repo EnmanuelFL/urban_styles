@@ -67,7 +67,15 @@ Todos los valores se formatean con `Intl.NumberFormat` en la locale `es-ES` con 
 
 ### Oferta relampago
 
-Al pulsar el boton de activar, se inicia un `setInterval` de 15 segundos. Durante ese tiempo, si hay productos en el carrito, se aplica automaticamente un cupon de descuento que se refleja en el desglose financiero. Al terminar el contador, el cupon se desactiva, el carrito se recalcula sin descuento y el boton queda disponible para futuras activaciones.
+Al pulsar el boton de activar, se inicia un `setInterval` de 15 segundos. Durante ese tiempo, el cupon queda activado. Si el carrito esta vacio, no se muestra descuento hasta anadir productos. Al tener productos, el descuento se calcula de forma dinamica y porcentual sobre el subtotal segun los estandares de comercio electronico, evitando importes negativos:
+
+- Subtotal mayor o igual a 500 euros: 15% de descuento (el cliente paga el 85% del importe)
+- Subtotal entre 300 y 499.99 euros: 12% de descuento
+- Subtotal entre 150 y 299.99 euros: 10% de descuento
+- Subtotal entre 50 y 149.99 euros: 8% de descuento
+- Subtotal menor a 50 euros: 5% de descuento
+
+Al terminar los 15 segundos, el cupon se desactiva automaticamente, el carrito se recalcula sin descuento y el boton queda disponible para futuras promociones.
 
 ### Resenas
 

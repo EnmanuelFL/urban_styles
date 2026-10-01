@@ -95,21 +95,18 @@ let cupon_activo = false;    // indica si el cupon de oferta relampago esta apli
 btn_oferta.addEventListener('click', () => {
     if (oferta_activa) return; // prevenir multiples clics mientras esta corriendo
     oferta_activa = true;
+    cupon_activo = true; // el cupon se activa inmediatamente al pulsar el boton
     contador = 15; // resetear el contador para cada nueva activacion
-    cupon_activo = false; // el cupon se aplica durante el conteo, no antes
     btn_oferta.textContent = 'Oferta activa...';
     btn_oferta.disabled = true;
     btn_oferta.classList.add('opacity-50', 'cursor-not-allowed');
 
+    // Actualizar el carrito: si ya hay productos aplica el descuento; si no hay productos, no se mostrara hasta anadirlos
+    actualizarCarrito();
+
     intervalo = setInterval(() => {
         contador--;
         span_contador.textContent = contador;
-
-        // Mientras el temporizador corre y hay productos en el carrito, aplicar cupon
-        if (contador > 0 && (carrito_chaqueta > 0 || carrito_camiseta > 0 || carrito_air_jordan > 0 || carrito_real_madrid > 0)) {
-            cupon_activo = true;
-            actualizarCarrito(); // Recalcular con descuento en tiempo real
-        }
 
         if (contador === 0) {
             clearInterval(intervalo);
@@ -117,7 +114,7 @@ btn_oferta.addEventListener('click', () => {
 
             // reset para futuras promociones: el boton vuelve a estar disponible
             oferta_activa = false;
-            cupon_activo = false; // el descuento se pierde al expirar
+            cupon_activo = false; // el descuento se desactiva al expirar la oferta
             actualizarCarrito(); // recalcular sin cupon
 
             span_contador.textContent = '—';
@@ -409,18 +406,41 @@ function actualizarCarrito() {
         (precio_float_air_jordan * carrito_air_jordan) +
         (precio_float_real_madrid * carrito_real_madrid);
 
-    // Calcular el descuento: cupon activo solo si hay productos y la oferta esta activa
-    const descuento_aplicado = (cupon_activo && subtotal_dinamico > 0) ? cupon : 0;
+    const hay_productos = carrito_chaqueta > 0 || carrito_camiseta > 0 || carrito_air_jordan > 0 || carrito_real_madrid > 0;
 
-    const base = subtotal_dinamico - descuento_aplicado; // Base imponible real
+    // Logica de descuento de ecommerce escalonado por volumen:
+    // Si el cupon esta activo y hay productos en el carrito:
+    // - Para compras mayores o iguales a 500 €, descuento del 15% (paga el 0.85 del importe)
+    // - Para compras entre 300 € y 499.99 €, descuento del 12%
+    // - Para compras entre 150 € y 299.99 €, descuento del 10%
+    // - Para compras entre 50 € y 149.99 €, descuento del 8%
+    // - Para compras menores a 50 €, descuento del 5%
+    let porcentaje_descuento = 0;
+    let descuento_aplicado = 0;
+
+    // Solo se calcula y muestra el descuento si el cupon esta activo Y hay productos anadidos
+    if (cupon_activo && hay_productos && subtotal_dinamico > 0) {
+        if (subtotal_dinamico >= 500) {
+            porcentaje_descuento = 0.15; // 15% de descuento (factor 0.85)
+        } else if (subtotal_dinamico >= 300) {
+            porcentaje_descuento = 0.12; // 12% de descuento
+        } else if (subtotal_dinamico >= 150) {
+            porcentaje_descuento = 0.10; // 10% de descuento
+        } else if (subtotal_dinamico >= 50) {
+            porcentaje_descuento = 0.08; // 8% de descuento
+        } else {
+            porcentaje_descuento = 0.05; // 5% de descuento
+        }
+        descuento_aplicado = subtotal_dinamico * porcentaje_descuento;
+    }
+
+    const base = subtotal_dinamico - descuento_aplicado; // Base imponible real (nunca negativa)
     const iva_calculado = base > 0 ? base * iva : 0;    // IVA sobre la base (nunca negativo)
     const total_calculado = base + iva_calculado;
 
     // Renderizar lista de items del carrito
     const items_div = document.querySelector('.items-carrito');
     items_div.innerHTML = ''; // Limpiar antes de re-renderizar
-
-    const hay_productos = carrito_chaqueta > 0 || carrito_camiseta > 0 || carrito_air_jordan > 0 || carrito_real_madrid > 0;
 
     if (!hay_productos) {
         const vacio = document.createElement('p');
@@ -455,7 +475,7 @@ function actualizarCarrito() {
     // Actualizar el desglose financiero via textContent
     document.querySelector('.subtotal').textContent = formatter_EUR.format(subtotal_dinamico);
     document.querySelector('.descuentos').textContent = descuento_aplicado > 0
-        ? `- ${formatter_EUR.format(descuento_aplicado)}`
+        ? `- ${formatter_EUR.format(descuento_aplicado)} (${Math.round(porcentaje_descuento * 100)}%)`
         : '—';
     document.querySelector('.iva').textContent = formatter_EUR.format(iva_calculado);
     document.querySelector('.total').textContent = formatter_EUR.format(total_calculado);
