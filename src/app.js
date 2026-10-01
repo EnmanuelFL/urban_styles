@@ -42,8 +42,12 @@ saldo = saldo ?? 2;
 
 let precio_chaqueta = "59.90€";
 let precio_camiseta = "19.99€";
+let precio_air_jordan = "149.95€";   // Precio ficticio Zapatillas Air Jordan
+let precio_real_madrid = "89.90€";  // Precio ficticio Camiseta Real Madrid
 let precio_float_chaqueta = parseFloat(precio_chaqueta);
 let precio_float_camiseta = parseFloat(precio_camiseta);
+let precio_float_air_jordan = parseFloat(precio_air_jordan);
+let precio_float_real_madrid = parseFloat(precio_real_madrid);
 let subtotal = precio_float_camiseta + precio_float_chaqueta;
 const iva = 0.21;
 let base_imponible = 0;
@@ -82,13 +86,17 @@ let intervalo = null; // aqui guardaremos el setInterval
 let oferta_activa = false;
 
 // Estado del carrito: unidades de cada producto y si el cupon esta aplicado
-let carrito_chaqueta = 0; // unidades de chaqueta en el carrito
-let carrito_camiseta = 0; // unidades de camiseta en el carrito
-let cupon_activo = false; // indica si el cupon de oferta relampago esta aplicado
+let carrito_chaqueta = 0;    // unidades de chaqueta en el carrito
+let carrito_camiseta = 0;    // unidades de camiseta en el carrito
+let carrito_air_jordan = 0;  // unidades de air jordan en el carrito
+let carrito_real_madrid = 0; // unidades de camiseta real madrid en el carrito
+let cupon_activo = false;    // indica si el cupon de oferta relampago esta aplicado
 
 btn_oferta.addEventListener('click', () => {
-    if (oferta_activa) return; // prevenir multiples clics
+    if (oferta_activa) return; // prevenir multiples clics mientras esta corriendo
     oferta_activa = true;
+    contador = 15; // resetear el contador para cada nueva activacion
+    cupon_activo = false; // el cupon se aplica durante el conteo, no antes
     btn_oferta.textContent = 'Oferta activa...';
     btn_oferta.disabled = true;
     btn_oferta.classList.add('opacity-50', 'cursor-not-allowed');
@@ -98,18 +106,24 @@ btn_oferta.addEventListener('click', () => {
         span_contador.textContent = contador;
 
         // Mientras el temporizador corre y hay productos en el carrito, aplicar cupon
-        if (contador > 0 && (carrito_chaqueta > 0 || carrito_camiseta > 0)) {
+        if (contador > 0 && (carrito_chaqueta > 0 || carrito_camiseta > 0 || carrito_air_jordan > 0 || carrito_real_madrid > 0)) {
             cupon_activo = true;
             actualizarCarrito(); // Recalcular con descuento en tiempo real
         }
 
         if (contador === 0) {
             clearInterval(intervalo);
-            oferta_activa = false; // reset para futuras promociones
-            span_contador.textContent = '0';
-            btn_oferta.textContent = 'Oferta expirada';
-            btn_oferta.classList.remove('border-white', 'hover:bg-white', 'hover:text-gray-900');
-            btn_oferta.classList.add('border-gray-600', 'text-gray-500', 'cursor-not-allowed');
+            intervalo = null;
+
+            // reset para futuras promociones: el boton vuelve a estar disponible
+            oferta_activa = false;
+            cupon_activo = false; // el descuento se pierde al expirar
+            actualizarCarrito(); // recalcular sin cupon
+
+            span_contador.textContent = '—';
+            btn_oferta.textContent = 'Activar oferta relámpago';
+            btn_oferta.disabled = false;
+            btn_oferta.classList.remove('opacity-50', 'cursor-not-allowed');
         }
     }, 1000);
 });
@@ -313,8 +327,7 @@ function renderizarProductos() {
                 <p class="text-xs uppercase tracking-widest text-gray-400 mb-1">Outerwear</p>
                 <h3 class="text-base font-semibold text-gray-900">Chaqueta Negra</h3>
                 <p class="product-precio-chaqueta text-2xl font-bold mt-2 mb-4"></p>
-                <button
-                    class="btn-add-chaqueta w-full py-2 text-xs font-medium tracking-widest uppercase border border-gray-900 hover:bg-gray-900 hover:text-white transition-colors">
+                <button class="btn-add-chaqueta w-full py-2 text-xs font-medium tracking-widest uppercase border border-gray-900 hover:bg-gray-900 hover:text-white transition-colors">
                     Añadir al carrito
                 </button>
             </div>
@@ -327,8 +340,33 @@ function renderizarProductos() {
                 <p class="text-xs uppercase tracking-widest text-gray-400 mb-1">Tops</p>
                 <h3 class="text-base font-semibold text-gray-900">Camiseta Miles Morales</h3>
                 <p class="product-precio-camiseta text-2xl font-bold mt-2 mb-4"></p>
-                <button
-                    class="btn-add-camiseta w-full py-2 text-xs font-medium tracking-widest uppercase border border-gray-900 hover:bg-gray-900 hover:text-white transition-colors">
+                <button class="btn-add-camiseta w-full py-2 text-xs font-medium tracking-widest uppercase border border-gray-900 hover:bg-gray-900 hover:text-white transition-colors">
+                    Añadir al carrito
+                </button>
+            </div>
+        </div>
+        <div class="product-card border border-gray-100 hover:-translate-y-0.5 hover:shadow-sm transition-all duration-200">
+            <div class="h-56 overflow-hidden bg-gray-50">
+                <img src="../assets/images/miles morales air_jordan.jfif" alt="Miles Morales Air Jordan" class="w-full h-full object-cover">
+            </div>
+            <div class="p-5">
+                <p class="text-xs uppercase tracking-widest text-gray-400 mb-1">Footwear</p>
+                <h3 class="text-base font-semibold text-gray-900">Miles Morales Air Jordan</h3>
+                <p class="product-precio-air-jordan text-2xl font-bold mt-2 mb-4"></p>
+                <button class="btn-add-air-jordan w-full py-2 text-xs font-medium tracking-widest uppercase border border-gray-900 hover:bg-gray-900 hover:text-white transition-colors">
+                    Añadir al carrito
+                </button>
+            </div>
+        </div>
+        <div class="product-card border border-gray-100 hover:-translate-y-0.5 hover:shadow-sm transition-all duration-200">
+            <div class="h-56 overflow-hidden bg-gray-50">
+                <img src="../assets/images/Real Madrid 2026-27 camiseta.jfif" alt="Camiseta Real Madrid 2026-27" class="w-full h-full object-cover">
+            </div>
+            <div class="p-5">
+                <p class="text-xs uppercase tracking-widest text-gray-400 mb-1">Sportswear</p>
+                <h3 class="text-base font-semibold text-gray-900">Camiseta Real Madrid 26/27</h3>
+                <p class="product-precio-real-madrid text-2xl font-bold mt-2 mb-4"></p>
+                <button class="btn-add-real-madrid w-full py-2 text-xs font-medium tracking-widest uppercase border border-gray-900 hover:bg-gray-900 hover:text-white transition-colors">
                     Añadir al carrito
                 </button>
             </div>
@@ -336,8 +374,10 @@ function renderizarProductos() {
     `;
 
     // Inyectar precios via textContent (nunca innerHTML para datos dinámicos)
-    document.querySelector('.product-precio-chaqueta').textContent = formatter_EUR.format(precio_float_chaqueta);
-    document.querySelector('.product-precio-camiseta').textContent = formatter_EUR.format(precio_float_camiseta);
+    document.querySelector('.product-precio-chaqueta').textContent   = formatter_EUR.format(precio_float_chaqueta);
+    document.querySelector('.product-precio-camiseta').textContent   = formatter_EUR.format(precio_float_camiseta);
+    document.querySelector('.product-precio-air-jordan').textContent = formatter_EUR.format(precio_float_air_jordan);
+    document.querySelector('.product-precio-real-madrid').textContent = formatter_EUR.format(precio_float_real_madrid);
 
     // Listeners de "añadir al carrito" para cada producto
     document.querySelector('.btn-add-chaqueta').addEventListener('click', () => {
@@ -348,57 +388,66 @@ function renderizarProductos() {
         carrito_camiseta++; // Incrementar unidades de camiseta
         actualizarCarrito();
     });
+    document.querySelector('.btn-add-air-jordan').addEventListener('click', () => {
+        carrito_air_jordan++; // Incrementar unidades de air jordan
+        actualizarCarrito();
+    });
+    document.querySelector('.btn-add-real-madrid').addEventListener('click', () => {
+        carrito_real_madrid++; // Incrementar unidades de camiseta real madrid
+        actualizarCarrito();
+    });
 }
 
 function actualizarCarrito() {
     // Calcular el subtotal dinamicamente segun unidades en el carrito
-    const subtotal_dinamico = (precio_float_chaqueta * carrito_chaqueta) + (precio_float_camiseta * carrito_camiseta);
+    const subtotal_dinamico =
+        (precio_float_chaqueta   * carrito_chaqueta)   +
+        (precio_float_camiseta   * carrito_camiseta)   +
+        (precio_float_air_jordan * carrito_air_jordan) +
+        (precio_float_real_madrid * carrito_real_madrid);
 
     // Calcular el descuento: cupon activo solo si hay productos y la oferta esta activa
     const descuento_aplicado = (cupon_activo && subtotal_dinamico > 0) ? cupon : 0;
 
     const base = subtotal_dinamico - descuento_aplicado; // Base imponible real
-    const iva_calculado = base > 0 ? base * iva : 0; // IVA sobre la base (nunca negativo)
+    const iva_calculado = base > 0 ? base * iva : 0;    // IVA sobre la base (nunca negativo)
     const total_calculado = base + iva_calculado;
 
     // Renderizar lista de items del carrito
     const items_div = document.querySelector('.items-carrito');
     items_div.innerHTML = ''; // Limpiar antes de re-renderizar
 
-    if (carrito_chaqueta === 0 && carrito_camiseta === 0) {
+    const hay_productos = carrito_chaqueta > 0 || carrito_camiseta > 0 || carrito_air_jordan > 0 || carrito_real_madrid > 0;
+
+    if (!hay_productos) {
         const vacio = document.createElement('p');
         vacio.className = 'text-xs text-gray-300 py-2';
         vacio.textContent = 'Tu carrito está vacío.'; // textContent para prevenir XSS
         items_div.appendChild(vacio);
     }
 
-    if (carrito_chaqueta > 0) {
-        const item = document.createElement('div');
-        item.className = 'flex justify-between items-center text-sm py-1';
-        const nombre = document.createElement('span');
-        nombre.className = 'text-gray-600';
-        nombre.textContent = `Chaqueta Denim ×${carrito_chaqueta}`; // textContent para prevenir XSS
-        const precio = document.createElement('span');
-        precio.className = 'font-medium text-gray-900';
-        precio.textContent = formatter_EUR.format(precio_float_chaqueta * carrito_chaqueta); // textContent para prevenir XSS
-        item.appendChild(nombre);
-        item.appendChild(precio);
-        items_div.appendChild(item);
-    }
+    // Definir los items a renderizar como array para evitar repeticion de codigo
+    const items_carrito = [
+        { nombre: 'Chaqueta Negra',              qty: carrito_chaqueta,    precio: precio_float_chaqueta   },
+        { nombre: 'Camiseta Miles Morales',       qty: carrito_camiseta,    precio: precio_float_camiseta   },
+        { nombre: 'Miles Morales Air Jordan',     qty: carrito_air_jordan,  precio: precio_float_air_jordan  },
+        { nombre: 'Camiseta Real Madrid 26/27',   qty: carrito_real_madrid, precio: precio_float_real_madrid },
+    ];
 
-    if (carrito_camiseta > 0) {
+    items_carrito.forEach(({ nombre, qty, precio }) => {
+        if (qty === 0) return; // Omitir productos sin unidades
         const item = document.createElement('div');
         item.className = 'flex justify-between items-center text-sm py-1';
-        const nombre = document.createElement('span');
-        nombre.className = 'text-gray-600';
-        nombre.textContent = `Camiseta Urban ×${carrito_camiseta}`; // textContent para prevenir XSS
-        const precio = document.createElement('span');
-        precio.className = 'font-medium text-gray-900';
-        precio.textContent = formatter_EUR.format(precio_float_camiseta * carrito_camiseta); // textContent para prevenir XSS
-        item.appendChild(nombre);
-        item.appendChild(precio);
+        const span_nombre = document.createElement('span');
+        span_nombre.className = 'text-gray-600';
+        span_nombre.textContent = `${nombre} ×${qty}`; // textContent para prevenir XSS
+        const span_precio = document.createElement('span');
+        span_precio.className = 'font-medium text-gray-900';
+        span_precio.textContent = formatter_EUR.format(precio * qty); // textContent para prevenir XSS
+        item.appendChild(span_nombre);
+        item.appendChild(span_precio);
         items_div.appendChild(item);
-    }
+    });
 
     // Actualizar el desglose financiero via textContent
     document.querySelector('.subtotal').textContent = formatter_EUR.format(subtotal_dinamico);
