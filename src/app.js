@@ -124,7 +124,7 @@ btn_subir_resenia.addEventListener('click', () => {
         return false;
     }
     resenias.forEach(resena => {
-        const div_hsitoria_resenias = document.createElement('div');
+        const div_historia_resenias = document.createElement('div');
         const titulo = document.createElement('p');
         titulo.textContent = `Publicado por: ${resena.usuario}`;
         const hora = document.createElement('p');
@@ -132,10 +132,10 @@ btn_subir_resenia.addEventListener('click', () => {
         const comentario = document.createElement('p');
         comentario.textContent = `Descripcion: ${resena.comentario}`;
         
-        div_hsitoria_resenias.appendChild(titulo);
-        div_hsitoria_resenias.appendChild(hora);
-        div_hsitoria_resenias.appendChild(comentario);
-        historial_resenias.appendChild(div_hsitoria_resenias);
+        div_historia_resenias.appendChild(titulo);
+        div_historia_resenias.appendChild(hora);
+        div_historia_resenias.appendChild(comentario);
+        historial_resenias.appendChild(div_historia_resenias);
     });
     text_resenias.value = '';
 });
