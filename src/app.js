@@ -307,9 +307,12 @@ btn_subir_resenia.addEventListener('click', () => {
 // CONECTAR DATOS CON HTML
 
 function mostrarSesion() {
-    document.querySelector('.user-name').textContent = user;
+    // Si el usuario viene de la URL se muestra tal cual; si no, se usa el apodo por defecto ("Cliente VIP")
+    document.querySelector('.user-name').textContent = user !== 'anonimo' ? user : apodo;
     document.querySelector('.user-id').textContent = id_cliente_formateado;
     document.querySelector('.role').textContent = role;
+    // La membresía usa ?? por lo que si era undefined queda como "Basica"
+    document.querySelector('.membresia').textContent = membresia;
     document.querySelector('.fecha_actual').textContent = date;
     document.querySelector('.idioma_navegador').textContent = lang;
 }
