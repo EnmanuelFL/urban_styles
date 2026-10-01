@@ -1,20 +1,20 @@
 // BLOQUE 1
 
 'use strict';
-const params =  new URLSearchParams(window.location.search); // Obtenmos el URL del navegador
-const user = params.get('user')  ?? 'anonimo'; // Obtenemos el usuario de la URL y si no tiene se le asigna 'anonimo' por defecto
-const role = params.get('role')  ?? 'invitado'; //  Obtenemos el role y si no tiene se le asigna 'invitado' por defecto
-const lang = navigator.language; // Aqui definimos una constante para que almacene el idioma del navegador
-const id = crypto.randomUUID(); // Creamos un ID unico y seguro con la api de crypto
+const params =  new URLSearchParams(window.location.search);
+const user = params.get('user')  ?? 'anonimo';
+const role = params.get('role')  ?? 'invitado';
+const lang = navigator.language;
+const id = crypto.randomUUID();
 const email = " enmanuellemos.f@gmail.com ";
 const id_cliente = "42";
+
 const btn_oferta = document.querySelector('.oferta_relampago');
 const span_contador = document.querySelector('.contador_oferta');
 const historial_resenias = document.querySelector('.historial_resenias');
 const text_resenias = document.querySelector('.text_resenias');
 const btn_subir_resenia = document.querySelector('.anyadir_resenia');
 
-// Constante para definir el formato de como queremos la fecha
 const date = new Date().toLocaleDateString("es-ES",{
     weekday: "long",
     day: "numeric",
@@ -22,15 +22,13 @@ const date = new Date().toLocaleDateString("es-ES",{
     year: "numeric"
 });
 
-const estado_conexion = navigator.onLine ? 'Conectado' : 'Desconectado'; // Constante para devolver el estado de conexion del navegador
-const email_limpio = email.trim().toLowerCase(); // Limpiamos los espacios del email y lo pasamos a minusculas
-let id_cliente_formateado = id_cliente.padStart(6, "0"); // Y formateamos el id para que tenga 6 digitos con ceros ala izquierda
-const partes_email = email_limpio.split("@"); // Seleccionamos el usario antes del @, ej: enma.garcia@gmail.com => seria: enma.garcia
-// Sellecionamos el usuario antes del @ y el dominio del corrio despues del @
+const estado_conexion = navigator.onLine ? 'Conectado' : 'Desconectado';
+const email_limpio = email.trim().toLowerCase();
+let id_cliente_formateado = id_cliente.padStart(6, "0");
+const partes_email = email_limpio.split("@");
 const usuario_email = partes_email[0]; 
 const dominio_email = partes_email[1];
 
-// Asignaciones por defecto
 let apodo = "";       
 let membresia = undefined;
 let saldo = null;      
@@ -40,116 +38,170 @@ saldo = saldo ?? 2;
 
 // BLOQUE 2 - CATALOGO Y OPERACIONES FINANCIERAS
 
-let precio_chaqueta = "59.90€";
-let precio_camiseta = "19.99€";
+// Estado del carrito y productos
+let precio_chaqueta = "129.99€"; // Ajustado al valor visual del diseño, aunque parsearemos
+let precio_camiseta = "39.99€";
 let precio_float_chaqueta = parseFloat(precio_chaqueta);
 let precio_float_camiseta = parseFloat(precio_camiseta);
-let subtotal = precio_float_camiseta + precio_float_chaqueta;
+
+let qty_jacket = 1;
+let qty_tshirt = 1;
 const iva = 0.21;
+let flash_sale_active = false;
+let discount_applied = false;
+
+// Variables de totales (globales por si se necesitan)
+let subtotal = 0;
 let base_imponible = 0;
 let iva_total = 0;
 let total_pago = 0;
-let cupon = "90€";
-
-cupon = parseFloat(cupon);
-if (!isNaN(subtotal)) { // Verificamos si subtotal es un numero
-    base_imponible = subtotal - cupon; // La base imponible de una factura es el importe neto de la venta o servicio antes de aplicar impuestos como el IVA o retenciones como el IRPF
-    iva_total = base_imponible * iva;
-    total_pago = base_imponible + iva_total;
-    console.log(total_pago);
-} else {
-    console.log("No es un numero");
-}
+let cupon_descuento = 0;
 
 let numero_pedido = 0;
 numero_pedido ++;
 
-// Formateamos de manera regional con la funcion Intl.NumberFormat, esto formatea de manera automatica a la moneda del pais
-// en este caso España 'es-ES'. Ej: '123456.789' => '123.456,79 €'
 const formatter_EUR = new Intl.NumberFormat("es-ES", {
     style: "currency",
     currency: "EUR"
 });
-const subtotal_formateado = formatter_EUR.format(subtotal);
-const cupon_formateado = formatter_EUR.format(cupon);
-const iva_total_formateado = formatter_EUR.format(iva_total);
-const total_pago_formateado = formatter_EUR.format(total_pago);
+
+function renderCart() {
+    // Calculamos el subtotal de los productos seleccionados
+    subtotal = (precio_float_chaqueta * qty_jacket) + (precio_float_camiseta * qty_tshirt);
+    
+    // Si la oferta flash fue activada (y no recargada)
+    if (discount_applied) {
+        cupon_descuento = subtotal * 0.15; // 15% de descuento
+    } else {
+        cupon_descuento = 0;
+    }
+
+    if (!isNaN(subtotal)) {
+        base_imponible = subtotal - cupon_descuento;
+        iva_total = base_imponible * iva;
+        total_pago = base_imponible + iva_total;
+    }
+
+    // Actualizar DOM
+    if(document.querySelector('.qty-jacket')) {
+        document.querySelector('.qty-jacket').textContent = qty_jacket;
+        document.querySelector('.item-total-jacket').textContent = formatter_EUR.format(precio_float_chaqueta * qty_jacket);
+    }
+    if(document.querySelector('.qty-tshirt')) {
+        document.querySelector('.qty-tshirt').textContent = qty_tshirt;
+        document.querySelector('.item-total-tshirt').textContent = formatter_EUR.format(precio_float_camiseta * qty_tshirt);
+    }
+    
+    if(document.querySelector('.subtotal')) document.querySelector('.subtotal').textContent = formatter_EUR.format(subtotal);
+    if(document.querySelector('.descuentos')) document.querySelector('.descuentos').textContent = cupon_descuento > 0 ? `- ${formatter_EUR.format(cupon_descuento)}` : '0,00 €';
+    if(document.querySelector('.iva')) document.querySelector('.iva').textContent = formatter_EUR.format(iva_total);
+    if(document.querySelector('.total')) document.querySelector('.total').textContent = formatter_EUR.format(total_pago);
+}
+
+// Botones de incremento/decremento
+document.addEventListener('click', (e) => {
+    const target = e.target.closest('button');
+    if (!target) return;
+
+    if (target.classList.contains('btn-plus-jacket')) { qty_jacket++; renderCart(); }
+    if (target.classList.contains('btn-minus-jacket') && qty_jacket > 0) { qty_jacket--; renderCart(); }
+    if (target.classList.contains('btn-plus-tshirt')) { qty_tshirt++; renderCart(); }
+    if (target.classList.contains('btn-minus-tshirt') && qty_tshirt > 0) { qty_tshirt--; renderCart(); }
+});
 
 // BLOQUE 3: OFERTA RELAMPAGO Y TEMPORIZADOR
 
 let contador = 15;
-let intervalo = null; // aqui guardaremos el setInterval
-let oferta_activa = false
+let intervalo = null;
+
+// Verifica si la oferta ya se agotó en esta sesión/recarga
+let oferta_agotada = false;
+
 btn_oferta.addEventListener('click', () => {
-    if (oferta_activa) return; // prevenir multiples clics
-    oferta_activa = true;
+    if (oferta_agotada) return; // Si ya se acabó el tiempo, no hacer nada.
     
+    // Si ya está corriendo, se aplica el descuento
+    if (intervalo !== null) {
+        if (!discount_applied) {
+            discount_applied = true;
+            renderCart();
+            btn_oferta.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Activado`;
+        }
+        return; 
+    }
+    
+    // Iniciar temporizador
     intervalo = setInterval(() => {
         contador--;
-        span_contador.textContent = `Contador: ${contador}`;
+        span_contador.textContent = contador;
         
-        if (contador === 0) {
+        if (contador <= 0) {
             clearInterval(intervalo);
-            oferta_activa = false; // reset para futuras promociones
-            span_contador.textContent = 'La oferta relampago ha expirado'; // notificar que expiro
+            oferta_agotada = true;
+            span_contador.textContent = '0';
+            document.querySelector('.oferta-container').innerHTML = '<span class="text-white/80 font-bold text-sm">Oferta expirada</span>'; // Elimina el botón
         }
     }, 1000);
 });
 
 // BLOQUE 4: CREACION Y PUBLICACION DE RESEÑAS
 
-btn_subir_resenia.addEventListener('click', () => {
-    const textarea_valor = text_resenias.value;
-    const resena = {
-        id: new Date().getTime(),
-        usuario: user, 
-        hora: new Date().toLocaleTimeString('es-ES'),
-        comentario: textarea_valor
-    };
+function formatTimeAgo(timestamp) {
+    const diff = Date.now() - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (minutes < 1) return 'hace un momento';
+    if (minutes < 60) return `hace ${minutes} minuto${minutes > 1 ? 's' : ''}`;
+    if (hours < 24) return `hace ${hours} hora${hours > 1 ? 's' : ''}`;
+    if (days < 7) return `hace ${days} día${days > 1 ? 's' : ''}`;
+    
+    const d = new Date(timestamp);
+    return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
+}
+
+function renderReviews() {
     let resenias = [];
     try {
-        resenias = JSON.parse(localStorage.getItem('resenias')) ?? []; //  Recuperar reseñas existentes (puede que no haya ninguna todavía)
-        resenias.push(resena); //  Añadir la nueva reseña
-        localStorage.setItem('resenias', JSON.stringify(resenias)); //  Guardar array actualizado
-    } catch (error) {
-        // Verificar si es error de espacio lleno
-        if (error.name === "QuotaExceededError" ||  
-            error.code === 22 || 
-            error.name === "NS_ERROR_DOM_QUOTA_REACHED" || 
-            error.code === 1014) {
-        console.error("Error: Espacio de almacenamiento lleno.");
-        } else {
-        console.error("Error al acceder a localStorage:", error.message); // Capturar otros errores (ej. modo privado, políticas de seguridad)
-        }
-        return false;
+        resenias = JSON.parse(localStorage.getItem('resenias')) ?? [];
+    } catch (e) {
+        resenias = [];
     }
-    
-    // Limpiar el contenedor antes de renderizar para evitar duplicados
+
     historial_resenias.innerHTML = '';
     
+    // Mostrar reseñas por defecto si no hay ninguna
+    if(resenias.length === 0) {
+        resenias = [
+            { id: Date.now() - 7200000, usuario: "Sofia M.", comentario: "La calidad es increíble y el ajuste es exactamente lo que estaba buscando." },
+            { id: Date.now() - 86400000, usuario: "Daniel R.", comentario: "Entrega rápida, un empaquetado hermoso y la chaqueta se siente premium." }
+        ];
+    }
+
     resenias.forEach(resena => {
-        const div_historia_resenias = document.createElement('article');
-        div_historia_resenias.className = 'rounded-2xl border border-[#dedbd4] bg-white p-6 shadow-sm';
+        const div = document.createElement('article');
+        div.className = 'rounded-2xl border border-[#dedbd4] bg-white p-6 shadow-sm';
         
-        const header_flex = document.createElement('div');
-        header_flex.className = 'flex items-start justify-between gap-4';
+        const header = document.createElement('div');
+        header.className = 'flex items-start justify-between gap-4';
         
-        const user_info_flex = document.createElement('div');
-        user_info_flex.className = 'flex items-center gap-4';
+        const user_info = document.createElement('div');
+        user_info.className = 'flex items-center gap-4';
         
         const avatar = document.createElement('div');
         avatar.className = 'flex size-11 items-center justify-center rounded-full bg-[#e6d8cf] text-[11px] font-bold text-[#8a5938] uppercase flex-shrink-0';
         avatar.textContent = resena.usuario.substring(0, 2);
         
         const text_container = document.createElement('div');
-        
         const titulo = document.createElement('h3');
         titulo.className = 'text-[14px] font-bold text-[#252321]';
+        // Proteger contra XSS: textContent neutraliza etiquetas
         titulo.textContent = resena.usuario;
         
         const hora = document.createElement('p');
         hora.className = 'mt-1 flex items-center gap-1.5 text-[11px] text-[#99948b]';
-        hora.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${resena.hora}`;
+        hora.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${formatTimeAgo(resena.id)}`;
         
         const stars = document.createElement('div');
         stars.className = 'flex gap-1 text-[#a86b42]';
@@ -157,37 +209,68 @@ btn_subir_resenia.addEventListener('click', () => {
         
         text_container.appendChild(titulo);
         text_container.appendChild(hora);
-        user_info_flex.appendChild(avatar);
-        user_info_flex.appendChild(text_container);
-        header_flex.appendChild(user_info_flex);
-        header_flex.appendChild(stars);
+        user_info.appendChild(avatar);
+        user_info.appendChild(text_container);
+        header.appendChild(user_info);
+        header.appendChild(stars);
         
         const comentario = document.createElement('p');
         comentario.className = 'mt-5 text-[14px] leading-relaxed text-[#666159]';
         comentario.textContent = resena.comentario;
         
-        div_historia_resenias.appendChild(header_flex);
-        div_historia_resenias.appendChild(comentario);
+        div.appendChild(header);
+        div.appendChild(comentario);
         
-        historial_resenias.appendChild(div_historia_resenias);
+        historial_resenias.appendChild(div);
     });
+}
+
+btn_subir_resenia.addEventListener('click', () => {
+    const textarea_valor = text_resenias.value.trim();
+    if(!textarea_valor) return;
+
+    // Encontrar el usuario actual (desde params o por defecto)
+    const nombreUsuario = user === 'anonimo' ? apodo : user;
+
+    const resena = {
+        id: Date.now(), // Marca de tiempo exacta
+        usuario: nombreUsuario, 
+        comentario: textarea_valor
+    };
+    
+    let resenias = [];
+    try {
+        resenias = JSON.parse(localStorage.getItem('resenias')) ?? [];
+        resenias.unshift(resena); // Añadir al principio
+        localStorage.setItem('resenias', JSON.stringify(resenias));
+    } catch (error) {
+        console.error("Error al acceder a localStorage:", error.message);
+        return false;
+    }
+    
+    renderReviews();
     text_resenias.value = '';
 });
 
-// BLOQUE 5: INICIALIZACIÓN DEL DOM (Conexión de datos)
+// BLOQUE 5: INICIALIZACIÓN DEL DOM
 document.addEventListener('DOMContentLoaded', () => {
     // Info de sesión
-    document.querySelector('.user-name').textContent = user === 'anonimo' ? apodo : user;
-    document.querySelector('.user-id').textContent = `ID ${id_cliente_formateado} · Customer`;
-    document.querySelector('.fecha_actual').textContent = date;
-    document.querySelector('.idioma_navegador').innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-        ${lang}
-    `;
+    if(document.querySelector('.user-name')) {
+        document.querySelector('.user-name').textContent = user === 'anonimo' ? apodo : user;
+        document.querySelector('.user-id').textContent = `ID ${id_cliente_formateado}`;
+        document.querySelector('.fecha_actual').textContent = date;
+    }
+    
+    if(document.querySelector('.idioma_navegador')) {
+        document.querySelector('.idioma_navegador').innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            ${lang}
+        `;
+    }
 
-    // Totales del carrito
-    document.querySelector('.subtotal').textContent = subtotal_formateado;
-    document.querySelector('.descuentos').textContent = `- ${cupon_formateado}`;
-    document.querySelector('.iva').textContent = iva_total_formateado;
-    document.querySelector('.total').textContent = total_pago_formateado;
+    // Inicializar totales visuales
+    renderCart();
+
+    // Renderizar reseñas
+    renderReviews();
 });
