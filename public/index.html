@@ -3,57 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urban Styles</title>
+    <title>Urban Style</title>
     <script src="https://www.googletagmanager.com/gtag/js" async></script>
-    <script src="src\app.js" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        accent: '#1a1a1a',
+                        muted: '#6b7280',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="../src/app.js" defer></script>
 </head>
-<body>
-    <header class="sesion">
-        <div class="user-name"></div> <!-- aqui ira el nombre -->
-        <div class="user-id"></div> <!-- aqui ira el ID formateado -->
-        <div class="role"></div> <!-- aqui ira el role -->
-        <div class="fecha_actual"></div> <!-- aqui ira la fecha actualizada -->
-        <div class="idioma_navegador"></div> <!-- aqui se mostrara el idioma en el que el navegador-->
+<body class="bg-white text-gray-900 font-sans antialiased">
 
+    <!-- HEADER: Barra de sesión minimalista -->
+    <header class="sesion border-b border-gray-100">
+        <div class="max-w-6xl mx-auto px-6 py-3 flex flex-wrap items-center gap-x-8 gap-y-1 text-xs text-gray-400">
+            <span>
+                <span class="uppercase tracking-widest font-medium text-gray-300 mr-2">Usuario</span>
+                <span class="user-name font-semibold text-gray-700"></span>
+            </span>
+            <span>
+                <span class="uppercase tracking-widest font-medium text-gray-300 mr-2">ID</span>
+                <span class="user-id font-mono text-gray-600"></span>
+            </span>
+            <span>
+                <span class="uppercase tracking-widest font-medium text-gray-300 mr-2">Rol</span>
+                <span class="role text-gray-600"></span>
+            </span>
+            <span class="idioma_navegador text-gray-500"></span>
+            <span class="fecha_actual ml-auto text-gray-400"></span>
+        </div>
     </header>
 
-    <main class="catalogo_carrito">
-        <section class="catalogo">
-            <div class="productos"> <!-- Aqui iran los productos -->
-                <!-- Se hara una card para cuando se vea el catalogo aparezcan varias opciones: añadir al carrito, etc... -->>
-            </div> 
-        </section>
-        <section class="carrito"> <!-- Aqui se añadoran los productos al tocar la opcion de "añadir al carrito" en el apartado de catalogo -->
-            <div class="cesta">
-                <div class="descuentos">Descuento</div>
-                <div class="iva">IVA</div>
-                <div class="subtotal">Subtotal</div>
-                <div class="total">Total</div>
-            </div>
-        </section>
+    <!-- HERO: Nombre de marca -->
+    <div class="max-w-6xl mx-auto px-6 pt-16 pb-12 border-b border-gray-100">
+        <p class="text-xs uppercase tracking-[0.3em] text-gray-400 mb-3">Moda · Colección 2026</p>
+        <h1 class="text-5xl md:text-6xl font-bold tracking-tight leading-none">Urban Style</h1>
+        <p class="mt-4 text-gray-400 text-sm max-w-md">Prendas esenciales, diseño intencionado. Para los que visten con criterio.</p>
+    </div>
+
+    <!-- MAIN: Catálogo + Carrito -->
+    <main class="catalogo_carrito max-w-6xl mx-auto px-6 py-14">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+
+            <!-- CATÁLOGO: Productos + Formulario de reseñas -->
+            <section class="catalogo lg:col-span-2 space-y-14">
+
+                <!-- Productos -->
+                <div>
+                    <h2 class="text-xs uppercase tracking-[0.3em] text-gray-400 mb-8">— Catálogo</h2>
+                    <div class="productos grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Aqui iran los productos renderizados por JS -->
+                        <!-- Se hara una card para cuando se vea el catalogo aparezcan varias opciones: añadir al carrito, etc... -->
+                    </div>
+                </div>
+
+                <!-- Formulario de reseñas (movido al catálogo, bajo los productos) -->
+                <div class="crear_resenias pt-8 border-t border-gray-100">
+                    <h3 class="text-xs uppercase tracking-[0.3em] text-gray-400 mb-6">— Tu opinión</h3>
+                    <textarea
+                        class="text_resenias w-full h-28 p-4 text-sm border border-gray-200 rounded-none focus:outline-none focus:border-gray-900 resize-none transition-colors placeholder:text-gray-300"
+                        placeholder="Indicanos tu opinion"></textarea>
+                    <button class="anyadir_resenia mt-3 px-6 py-2.5 bg-gray-900 text-white text-sm font-medium tracking-wide hover:bg-gray-700 transition-colors">
+                        Publicar reseña
+                    </button>
+                    <!-- En el archivo js a la hora de crear la reseña aparece un boton de publicar -->
+                </div>
+
+            </section>
+
+            <!-- CARRITO: Panel lateral sticky -->
+            <section class="carrito">
+                <div class="sticky top-8">
+                    <h2 class="text-xs uppercase tracking-[0.3em] text-gray-400 mb-8">— Tu carrito</h2>
+
+                    <!-- Lista de ítems del carrito -->
+                    <div class="items-carrito mb-6 space-y-3 min-h-[60px]">
+                        <!-- JS renderiza los ítems aquí -->
+                    </div>
+
+                    <!-- Desglose financiero -->
+                    <div class="cesta border-t border-gray-100 pt-5 space-y-3 text-sm">
+                        <div class="flex justify-between items-center text-gray-500">
+                            <span>Subtotal</span>
+                            <span class="subtotal font-medium text-gray-900"></span>
+                        </div>
+                        <div class="flex justify-between items-center text-gray-500">
+                            <span>Descuento (cupón)</span>
+                            <span class="descuentos font-medium text-emerald-600"></span>
+                        </div>
+                        <div class="flex justify-between items-center text-gray-500">
+                            <span>IVA 21%</span>
+                            <span class="iva font-medium text-gray-900"></span>
+                        </div>
+                    </div>
+
+                    <!-- Total destacado -->
+                    <div class="mt-5 pt-5 border-t border-gray-900 flex justify-between items-baseline">
+                        <span class="text-xs uppercase tracking-widest text-gray-400">Total</span>
+                        <span class="total text-3xl font-bold tracking-tight"></span>
+                    </div>
+
+                    <button class="mt-6 w-full py-3 bg-gray-900 text-white text-sm font-medium tracking-wide hover:bg-gray-700 transition-colors">
+                        Finalizar compra
+                    </button>
+                </div>
+            </section>
+
+        </div>
     </main>
 
-    <section class="ofertas">
-        <div class="banner_promocional">
-            <img class="img_banner_promocional" src="" alt=""> <!-- Aqui ira el banner promocional -->
-            <button class="oferta_relampago" >Activar oferta relampago</button>
-            <span class="contador_oferta"></span>
+    <!-- OFERTA RELÁMPAGO: Banner de alta urgencia -->
+    <section class="ofertas bg-gray-900 text-white">
+        <div class="max-w-6xl mx-auto px-6 py-14">
+            <div class="banner_promocional flex flex-col md:flex-row items-start md:items-center justify-between gap-8">
+                <div>
+                    <p class="text-xs uppercase tracking-[0.3em] text-gray-500 mb-3">Tiempo limitado</p>
+                    <h2 class="text-4xl md:text-5xl font-bold leading-tight">⚡ Oferta<br>relámpago</h2>
+                    <p class="mt-3 text-gray-400 text-sm">Activa el cupón antes de que expire el contador.</p>
+                    <img class="img_banner_promocional hidden mt-6 rounded" src="" alt="">
+                </div>
+                <div class="flex flex-col items-start md:items-end gap-5">
+                    <div class="text-8xl font-bold tabular-nums leading-none">
+                        <span class="contador_oferta text-white">—</span>
+                    </div>
+                    <button class="oferta_relampago px-8 py-3 border border-white text-white text-sm font-medium tracking-wide hover:bg-white hover:text-gray-900 transition-all">
+                        Activar oferta relámpago
+                    </button>
+                </div>
+            </div>
         </div>
-        
     </section>
 
-    <section class="resenias">
-        <div class="crear_resenias">
-            <textarea class="text_resenias">Indicanos tu opinion</textarea>
-            <button class="anyadir_resenia">Añadir reseña</button>
-            <!-- En el archivo js a la hora de crear la reseña aparece un boton de publicar -->
-        </div>
-        <div class="historial_resenias">
-
+    <!-- RESEÑAS: Historial de opiniones (sin formulario, ya está en el catálogo) -->
+    <section class="resenias max-w-6xl mx-auto px-6 py-14">
+        <h2 class="text-xs uppercase tracking-[0.3em] text-gray-400 mb-10">— Opiniones de clientes</h2>
+        <div class="historial_resenias grid grid-cols-1 md:grid-cols-2 gap-5">
+            <!-- JS renderiza las reseñas aquí -->
         </div>
     </section>
-    
-    <footer class="footer"></footer>
-    
+
+    <!-- FOOTER -->
+    <footer class="footer border-t border-gray-100">
+        <div class="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-300">
+            <span>© 2026 Urban Style. Todos los derechos reservados.</span>
+            <span class="tracking-widest uppercase">Made with intention.</span>
+        </div>
+    </footer>
+
 </body>
 </html>
